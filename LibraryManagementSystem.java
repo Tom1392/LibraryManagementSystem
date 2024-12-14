@@ -1,53 +1,20 @@
 package library.management.system;
-
-
 import java.util.*;
-
-
 
 public class LibraryManagementSystem
 {
     Scanner kb = new Scanner(System.in);
-    ArrayList<Book> allBooks=new ArrayList<Book>();
-    HashMap<String,Boolean> isIssued=new HashMap<String,Boolean>();
+    private ArrayList<Book> allBooks=new ArrayList<Book>();
+    private HashMap<String,Boolean> isIssued=new HashMap<String,Boolean>();
+    private Book selectedBook;
 
-
-
-//CLass for book objects
-    class Book
-    {
-        //Instance fields for book objects.
-        private final String title;
-        private final String author;
-        private final String IBSN;
-        //Constructor for book objects with parameters to fill instance fields.
-        public Book(String title, String author, String IBSN)
-        {
-            this.title=title;
-            this.author=author;
-            this.IBSN=IBSN;
-        }
-        //Getter and setter methods for instance fields.
-        public String getTitle()
-        {
-            return this.title;
-        }
-        public String getAuthor()
-        {
-            return this.author;
-        }
-        public String getIBSN()
-        {
-            return this.IBSN;
-        }
-    }
     //Created a comparator for comparing book titles
     class titleComparator implements Comparator<Book>
     {
         //Overrides the compare method
         public int compare(Book book1, Book book2)
         {
-            return book1.title.compareTo(book2.title);
+            return book1.getTitle().compareTo(book2.getTitle());
         }
     }
 
@@ -115,7 +82,7 @@ public class LibraryManagementSystem
             case 3:
                 displayBooks();
             case 4:
-               // removeBook();
+                removeBook();
             case 5:
                // issueBook();
             case 0:
@@ -123,6 +90,11 @@ public class LibraryManagementSystem
                 System.exit(0);
                 break;
         }
+    }
+    //Returns user to main menu
+    public void cancel()
+    {
+        mainMenu();
     }
 
     public void addBook() {
@@ -143,7 +115,7 @@ public class LibraryManagementSystem
                 System.out.println(newBook.getTitle());
                 System.out.println(newBook.getAuthor());
                 System.out.println(newBook.getIBSN());
-                System.out.println("Please confirm book;             y | n");
+                System.out.println("Please confirm book");
                 boolean userConfirm=yOrN();
                 if(userConfirm)
                 {
@@ -164,31 +136,11 @@ public class LibraryManagementSystem
         }
     }
 
-    public void displayBooks()
-    {
-        //Use Comparator to sort book alphabetically by title.
-        allBooks.sort(new titleComparator());
-        //Iterate over each book in allBooks ArrayList (Every book in the library).
-        for(Book book : allBooks)
-        {
-            //Iterate over each value key in isIssued HashMap (Every book's issued status)
-            for(String i : isIssued.keySet())
-            {
-                //If book's key in isIssued matches that of the current book iterated over;
-                if(i.equals(book.IBSN))
-                {
-                    //Assign bookStatus the value of the current key,
-                    Boolean bookStatus=isIssued.get(i);
-                    //and print the values of the book along with that of bookStatus
-                    System.out.println(book.title+" "+book.author+" "+book.IBSN+" "+bookStatus);
-                }
-            }
-        }
-    next(3);
-    }
 
-    public void searchBook()
+    public Book searchBook()
     {
+        int bookOption;
+        String titleOrAuthor;
         ArrayList<Book> searchresults = new ArrayList<Book>();
         ArrayList<Book> bookOfAuthor=new ArrayList<Book>();
         ArrayList<Book> booksWithTitle=new ArrayList<Book>();
@@ -196,15 +148,18 @@ public class LibraryManagementSystem
         while (!valid) {
             try {
                 System.out.println("Enter book title or authors name:");
-                String titleOrAuthor=kb.nextLine();
+                titleOrAuthor = kb.nextLine();
                 if (titleOrAuthor.isEmpty()) throw new InputMismatchException();
+                valid = true;
+
+
                 for (Book book : allBooks)
                 {
-                    if(book.title.equals(titleOrAuthor))
+                    if(book.getTitle().equalsIgnoreCase(titleOrAuthor))
                     {
                         booksWithTitle.add(book);
                     }
-                    else if(book.author.equals(titleOrAuthor))
+                    else if(book.getAuthor().equalsIgnoreCase(titleOrAuthor))
                     {
                         bookOfAuthor.add(book);
                     }
@@ -212,6 +167,7 @@ public class LibraryManagementSystem
                 if(booksWithTitle.isEmpty() && bookOfAuthor.isEmpty())
                 {
                     System.out.println("No results found");
+
                     next(2);
                 }
                 else
@@ -223,32 +179,128 @@ public class LibraryManagementSystem
                 {
                     searchresults=booksWithTitle;
                 }
-                {
-                    System.out.println("All results");
+                System.out.println("All results");
                     for (int j=0;j<searchresults.size();j++)
                     {
                         for(String i : isIssued.keySet())
                         {
-                            if(i.equals(searchresults.get(j).IBSN))
+                            if(i.equals(searchresults.get(j).getIBSN()))
                             {
                                 boolean bookStatus=isIssued.get(i);
-                                System.out.println("|"+(j-1)+"| "+searchresults.get(j).title
-                                        +" " +searchresults.get(j).author+" "+searchresults.get(j).IBSN+" " +bookStatus);
+                                System.out.println("|"+(j+1)+"| "+searchresults.get(j).getTitle()
+                                        +" " +searchresults.get(j).getAuthor()+" "+searchresults.get(j).getIBSN()+" " +bookStatus);
                             }
                         }
                     }
-                }
-                }
-            catch (InputMismatchException e)
-            {
+            } catch (InputMismatchException e) {
                 System.out.println("Error: Invalid input");
             }
         }
+
+        valid=false;
+                while(!valid)
+                {
+                    try
+                    {
+                        System.out.println("Please select book:                   |0| Cancel");
+                        bookOption = Integer.parseInt(kb.nextLine());
+                        if (bookOption == 0) {cancel();}
+                        if (bookOption - 1 > searchresults.size() || bookOption < 0)
+                        {
+                            throw new InputMismatchException("Error: Invalid selection");
+                        }
+                        valid = true;
+                        selectedBook = allBooks.get(bookOption - 1);
+                        searchresults.clear();
+                        next(3);
+                        }
+                        catch (InputMismatchException | NumberFormatException e)
+                        {
+                            System.out.println("Error: " + e.getMessage());
+                        }
+                }
+        return selectedBook;
+    }
+
+    public void displayBooks()
+    {
+        //Use Comparator to sort book alphabetically by title.
+        allBooks.sort(new titleComparator());
+        //Iterate over each book in allBooks ArrayList (Every book in the library).
+        for(Book book : allBooks)
+        {
+            //Iterate over each value key in isIssued HashMap (Every book's issued status)
+            for(String i : isIssued.keySet())
+            {
+                //If book's key in isIssued matches that of the current book iterated over;
+                if(i.equals(book.getIBSN()))
+                {
+                    //Assign bookStatus the value of the current key,
+                    Boolean bookStatus=isIssued.get(i);
+                    //and print the values of the book along with that of bookStatus
+                    System.out.println(book.getTitle()+" "+book.getAuthor()+" "+book.getIBSN()+" "+bookStatus);
+                }
+            }
+        }
+        next(3);
+    }
+public void removeBook()
+{
+    boolean valid=false;
+    String removeIBSN;
+    while(!valid)
+    {
+        try
+        {
+            System.out.println("Enter IBSN of book to remove");
+            removeIBSN=kb.nextLine();
+            if (removeIBSN.length() != 10 && removeIBSN.length() != 13) throw new InputMismatchException();
+            valid=true;
+            for(Book book : allBooks)
+            {
+                if (book.getIBSN().equals(removeIBSN))
+                {
+                    System.out.println("Confirm you wish to remove the following book:");
+                    System.out.println(book.getTitle()+" by "+book.getAuthor());
+                    if(yOrN())
+                    {
+                    allBooks.remove(book);
+                    for(String i : isIssued.keySet())
+                    {
+                        if(i.equals(removeIBSN)) {
+                            isIssued.remove(i);
+                            System.out.println("Book has been removed successfully");
+                            next(4);
+                        }
+                        }
+                    }
+                    else break;
+                }
+            }
+        }
+        catch (InputMismatchException e)
+            {
+                System.out.println("Error: Invalid input");
+            }
+    }
+next(4);
+}
+
+
+
+
+
+
+    public void issueBook()
+    {
+
     }
 
 
 
-    
+
+
+
     public void next(int repeatedOption)
 {
     boolean valid=false;
@@ -296,6 +348,7 @@ public boolean yOrN()
     {
         try
         {
+            System.out.println("                                         y | n");
             String userConfirm=kb.nextLine().trim();
             if(userConfirm.equalsIgnoreCase("y"))
             {
@@ -319,7 +372,15 @@ public boolean yOrN()
 
 public static void main(String[] args)
     {
-LibraryManagementSystem newLibrary = new LibraryManagementSystem();
-newLibrary.mainMenu();
+        LibraryManagementSystem newLibrary = new LibraryManagementSystem();
+        newLibrary.allBooks.add(new Book("The road","Comac Mcarther","1679435286"));
+        newLibrary.allBooks.add(new Book("the Player of Games","Iain M Banks","6798246384"));
+        newLibrary.allBooks.add(new Book("HandMaids Tale","Margret Atwood","4981674358"));
+        newLibrary.allBooks.add(new Book("Lexicon","Max Barry", "4678153948"));
+        newLibrary.isIssued.put("1679435286",false);
+        newLibrary.isIssued.put("6798246384",false);
+        newLibrary.isIssued.put("4981674358",false);
+        newLibrary.isIssued.put("4678153948",false);
+        newLibrary.mainMenu();
     }
 }

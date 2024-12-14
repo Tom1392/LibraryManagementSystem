@@ -1,8 +1,9 @@
 package library.management.system;
 
 //CLass for book objects
-class Book
+class Book extends LibraryManagementSystem
 {
+
     //Instance fields for book objects.
     private final String title;
     private final String author;
@@ -27,4 +28,11 @@ class Book
     {
         return this.IBSN;
     }
+
+
+
+
+
+
+
 }
