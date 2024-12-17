@@ -14,7 +14,27 @@ public class LibraryManagementSystem
         //Overrides the compare method
         public int compare(Book book1, Book book2)
         {
-            return book1.getTitle().compareTo(book2.getTitle());
+            if(book1.getTitle().toLowerCase().startsWith("the")&&book2.getTitle().toLowerCase().startsWith("the"))
+            {
+                String noThe1=book1.getTitle().substring(4);
+                String noThe2=book2.getTitle().substring(4);
+                return noThe1.compareTo(noThe2);
+            }
+             else if(book1.getTitle().toLowerCase().startsWith("the"))
+            {
+
+                String noThe = book1.getTitle().substring(4);
+                return noThe.compareTo(book2.getTitle());
+            }
+             else if(book2.getTitle().toLowerCase().startsWith("the"))
+            {
+                String noThe = book2.getTitle().substring(4);
+                return book1.getTitle().compareTo(noThe);
+            }
+            else
+            {
+                return book1.getTitle().compareTo(book2.getTitle());
+            }
         }
     }
 
@@ -26,20 +46,27 @@ public class LibraryManagementSystem
             System.out.println();
             for(int j=0;j<53;j++)
             {
-                if (i==1 && j==18)
+                if (i==1 && j==21)
                 {
                     System.out.print(" EduBooks ");
-                    j+=12;
+                    j+=9;
                 }
-                else if(i==3 && j==10)
+                else if(i==3 && j==12)
                 {
                     System.out.print(" Library Management System ");
-                    j+=10;
+                    j+=26;
                 }
 
                 else {System.out.print("/");}
             }
         }
+    }
+
+    public void displayHeader()
+    {
+        System.out.println("----------------------------------------------------------------------------------------");
+        System.out.println("|N"+(char)176+"|  Title                         | Author                   | IBSN         | Issued");
+        System.out.println("----------------------------------------------------------------------------------------");
     }
 
     public void mainMenu()
@@ -51,8 +78,8 @@ public class LibraryManagementSystem
         {
             try {
                 System.out.println("\n|1| Add Book\n|2| Search Book\n" +
-                        "|3| Display Book\n|4| Remove Book\n|5| Issue Book\n|0| Exit");
-                System.out.println("/////////////////////////////////////////////////");
+                        "|3| Display Book\n|4| Remove Book\n|0| Exit");
+                System.out.println("/////////////////////////////////////////////////////");
                 String strUserOp=kb.nextLine();
                 userOp = Integer.parseInt(strUserOp);
 
@@ -65,7 +92,6 @@ public class LibraryManagementSystem
             catch (InputMismatchException|NumberFormatException e)
             {
                 System.out.println("Error: Invalid selection");
-                kb.nextLine();
             }
         }
         menuOptions(userOp);
@@ -97,25 +123,31 @@ public class LibraryManagementSystem
         mainMenu();
     }
 
-    public void addBook() {
+    public void addBook()
+    {
+        int cancel;
         boolean valid = false;
-        while (!valid) {
+        while (!valid)
+        {
             try {
-                System.out.println("Enter the book title;");
-                String title = kb.nextLine();
+                System.out.println("Enter the book title:                     |0| Cancel");
+                String title = kb.nextLine().trim();
+                if(title.equals("0")) cancel();
                 if (title.isEmpty()) throw new InputMismatchException();
-                System.out.println("Enter the authors name;");
-                String author = kb.nextLine();
+                System.out.println("Enter the authors name:                   |0| Cancel");
+                String author = kb.nextLine().trim();
+                if(author.equals("0")) cancel();
                 if (author.isEmpty()) throw new InputMismatchException();
-                System.out.println("Enter the books ISBN;");
+                System.out.println("Enter the books ISBN:                     |0| Cancel\n(Must be 10 or 13 digits)");
                 String ISBN = kb.nextLine();
+                if(ISBN.equals("0")) cancel();
                 if (ISBN.length() != 10 && ISBN.length() != 13) throw new InputMismatchException();
                 valid = true;
                 Book newBook = new Book(title,author,ISBN);
-                System.out.println(newBook.getTitle());
-                System.out.println(newBook.getAuthor());
-                System.out.println(newBook.getIBSN());
-                System.out.println("Please confirm book");
+                System.out.println("Title  | "+newBook.getTitle());
+                System.out.println("Author | "+newBook.getAuthor());
+                System.out.println("IBSN   | "+newBook.getIBSN());
+                System.out.println("Please confirm book:");
                 boolean userConfirm=yOrN();
                 if(userConfirm)
                 {
@@ -147,8 +179,9 @@ public class LibraryManagementSystem
         boolean valid = false;
         while (!valid) {
             try {
-                System.out.println("Enter book title or authors name:");
+                System.out.println("Enter book title or authors name:          |0| Cancel");
                 titleOrAuthor = kb.nextLine();
+                if(titleOrAuthor.equals("0")) cancel();
                 if (titleOrAuthor.isEmpty()) throw new InputMismatchException();
                 valid = true;
 
@@ -180,18 +213,10 @@ public class LibraryManagementSystem
                     searchresults=booksWithTitle;
                 }
                 System.out.println("All results");
+                displayHeader();
                     for (int j=0;j<searchresults.size();j++)
                     {
-                        for(String i : isIssued.keySet())
-                        {
-                            if(i.equals(searchresults.get(j).getIBSN()))
-                            {
-                                boolean bookStatus=isIssued.get(i);
-                                System.out.println("|"+(j+1)+"| "+searchresults.get(j).getTitle()
-                                        +" " +searchresults.get(j).getAuthor()+" "+searchresults.get(j).getIBSN()+
-                                        " " +bookStatus);
-                            }
-                        }
+                        bookDisplay(searchresults.get(j),j+1);
                     }
             } catch (InputMismatchException e) {
                 System.out.println("Error: Invalid input");
@@ -204,7 +229,9 @@ public class LibraryManagementSystem
                 {
                     try
                     {
-                        System.out.println("Please select book:                   |0| Cancel");
+                        System.out.println("////////////////////////////////////////////////////////////////////////////////////////");
+                        System.out.println("Please select book:                                            " +
+                                "              |0| Cancel");
                         bookOption = Integer.parseInt(kb.nextLine());
                         if (bookOption == 0) {cancel();}
                         if (bookOption - 1 > searchresults.size() || bookOption < 0)
@@ -234,7 +261,8 @@ public class LibraryManagementSystem
         {
             try
             {
-                System.out.println("Select next step for "+selectedBook.getTitle()+":                   |0| Cancel");
+                System.out.println("Select next step for "+selectedBook.getTitle()+" by "+selectedBook.getAuthor()+
+                        "                              |0| Cancel");
                 System.out.println("|1| Issue Book\n|2| Remove Book");
                 bookAction = Integer.parseInt(kb.nextLine());
                 if(bookAction<0||bookAction>2)
@@ -255,26 +283,64 @@ public class LibraryManagementSystem
 
     public void displayBooks()
     {
+        displayHeader();
         //Use Comparator to sort book alphabetically by title.
         allBooks.sort(new titleComparator());
         //Iterate over each book in allBooks ArrayList (Every book in the library).
-        for(Book book : allBooks)
+        for(int i=0; i<allBooks.size();i++)
         {
             //Iterate over each value key in isIssued HashMap (Every book's issued status)
-            for(String i : isIssued.keySet())
+            for(String j : isIssued.keySet())
             {
                 //If book's key in isIssued matches that of the current book iterated over;
-                if(i.equals(book.getIBSN()))
+                if(j.equals(allBooks.get(i).getIBSN()))
                 {
                     //Assign bookStatus the value of the current key,
-                    Boolean bookStatus=isIssued.get(i);
+                    Boolean bookStatus=isIssued.get(j);
                     //and print the values of the book along with that of bookStatus
-                    System.out.println(book.getTitle()+" "+book.getAuthor()+" "+book.getIBSN()+" "+bookStatus);
+                    //System.out.println(book.getTitle()+" "+book.getAuthor()+" "+book.getIBSN()+" "+bookStatus);
+                    bookDisplay(allBooks.get(i),i+1);
                 }
             }
         }
+        System.out.println("----------------------------------------------------------------------------------------");
         next(3);
     }
+
+
+
+    public void bookDisplay(Book currentBook,int label)
+    {
+        Boolean issueStatus;
+        String titlePadded=currentBook.getTitle();
+        String authorPad=currentBook.getAuthor();
+        String IBSNPad=currentBook.getIBSN();
+        for(int i = 0; i<30-currentBook.getTitle().length();i++)
+        {
+            titlePadded+=" ";
+        }
+        for(int i=0;i<25-currentBook.getAuthor().length();i++)
+        {
+            authorPad+=" ";
+        }
+        for(int i=0; i<14-currentBook.getIBSN().length();i++)
+        {
+            IBSNPad+=" ";
+        }
+        for(String IBSN : isIssued.keySet())
+        {
+            if(IBSN.equals(currentBook.getIBSN()))
+            {
+                issueStatus=isIssued.get(IBSN);
+                System.out.println("|"+label+"|   "+titlePadded+"| "+authorPad+"| "
+                        +IBSNPad+"| "+issueStatus);
+            }
+        }
+
+    }
+
+
+
 public void removeBook()
 {
     boolean valid=false;
@@ -283,15 +349,16 @@ public void removeBook()
     {
         try
         {
-            System.out.println("Enter IBSN of book to remove");
+            System.out.println("Enter IBSN of book to remove:                   |0| Cancel");
             removeIBSN=kb.nextLine();
+            if(removeIBSN.equals("0")) cancel();
             if (removeIBSN.length() != 10 && removeIBSN.length() != 13) throw new InputMismatchException();
             valid=true;
             for(Book book : allBooks)
             {
                 if (book.getIBSN().equals(removeIBSN))
                 {
-                    System.out.println("Confirm you wish to remove the following book:");
+                    System.out.println("Confirm you wish to remove the following book:                   |0| Cancel");
                     System.out.println(book.getTitle()+" by "+book.getAuthor());
                     if(yOrN())
                     {
@@ -306,8 +373,9 @@ public void removeBook()
                         }
                         }
                     }
-                    else break;
+                    else next(4);
                 }
+                else System.out.println("No such book found"); break;
             }
         }
         catch (InputMismatchException e)
@@ -339,11 +407,11 @@ next(4);
                         {
                             isIssued.remove(i);
                             System.out.println("Book has been removed successfully");
-                            next(4);
+                            next(2);
                         }
                     }
                 }
-                else break;
+                else next(2);
             }
         }
     }
@@ -359,23 +427,23 @@ next(4);
             {
                 while(!valid) {
                     try {
-                        System.out.println(selectedBook.getTitle() +" "+ selectedBook.getAuthor() +" "+
+                        System.out.println(selectedBook.getTitle()+" "+selectedBook.getAuthor()+" "+
                                 selectedBook.getIBSN());
-                        System.out.println("Select option:                   |0| Cancel\n|1| Borrow\n|2| Return");
+                        System.out.println("Select option:                        |0| Cancel\n|1| Borrow\n|2| Return");
                         userOption = Integer.parseInt(kb.nextLine());
                         if (userOption < 0 || userOption > 2) throw new InputMismatchException();
                         else if (userOption == 1) {
                             requestBorrow = true;
                             if (isIssued.get(IBSN)) {
                                 System.out.println("Book is currently unavailable");
-                                next(5);
+                                next(2);
                             } else if (!isIssued.get(IBSN)) {
-                                System.out.println("Confirm you wish to borrow " + selectedBook.getTitle());
+                                System.out.println("Confirm you wish to borrow " + selectedBook.getTitle()+"   |0| Cancel");
                                 if (yOrN()) {
                                     isIssued.replace(IBSN, true);
                                     System.out.println("Book has been successfully issued.");
-                                    next(5);
-                                } else next(5);
+                                    next(2);
+                                } else next(2);
                             } else {
                                 requestReturn = true;
                                 if (!isIssued.get(IBSN)) {
@@ -384,10 +452,10 @@ next(4);
                                     {
                                         isIssued.replace(IBSN, false);
                                         System.out.println("Book has successfully been returned.");
-                                        next(5);
-                                    } else next(5);
+                                        next(2);
+                                    } else next(2);
                                 } else System.out.println("Book is not issued and cannot be returned");
-                                next(5);
+                                next(2);
                             }
                         }
                         valid = true;
@@ -414,10 +482,10 @@ next(4);
     {
     try
     {
-    System.out.println("/////////////////////////////////////////////////");
+    System.out.println("////////////////////////////////////////////////////");
     System.out.println("Next:\n|0| Menu\n|1| Repeat");
     int userOption=Integer.parseInt(kb.nextLine());
-    if(userOption<0||userOption>1)
+    if(userOption<0||userOption>4)
     {
         throw new InputMismatchException();
     }
@@ -432,8 +500,6 @@ next(4);
                     menuOptions(3);
                 case 4:
                     menuOptions(4);
-                case 5:
-                    menuOptions(5);
             }
         case 0:
             mainMenu();
@@ -456,6 +522,7 @@ public boolean yOrN()
         {
             System.out.println("                                         y | n");
             String userConfirm=kb.nextLine().trim();
+            if(userConfirm.equals("0")) cancel();
             if(userConfirm.equalsIgnoreCase("y"))
             {
                 confirmed=true;
