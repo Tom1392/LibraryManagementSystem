@@ -3,13 +3,17 @@ package library.management.system;
 import java.util.InputMismatchException;
 
 //CLass for book objects
-class Book extends LibraryManagementSystem
+class Book
 {
 
     //Instance fields for book objects.
-    private final String title;
-    private final String author;
-    private final String IBSN;
+    private String title;
+    private String author;
+    private String IBSN;
+    private boolean isIssued=false;
+
+    public Book(){}
+
     //Constructor for book objects with parameters to fill instance fields.
     public Book(String title, String author, String IBSN)
     {
@@ -22,13 +26,33 @@ class Book extends LibraryManagementSystem
     {
         return this.title;
     }
+    public void setTitle(String titleValue)
+    {
+        this.title=titleValue;
+    }
     public String getAuthor()
     {
         return this.author;
     }
+    public void setAuthor(String authorValue)
+    {
+        this.author=authorValue;
+    }
     public String getIBSN()
     {
         return this.IBSN;
+    }
+    public void setIBSN(String IBSNValue)
+    {
+        this.IBSN=IBSNValue;
+    }
+    public boolean getisIssued()
+    {
+        return this.isIssued;
+    }
+    public Boolean setisIssued(Boolean isIssuedValue)
+    {
+        return this.isIssued=isIssuedValue;
     }
 
 
