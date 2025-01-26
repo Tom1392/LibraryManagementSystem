@@ -1,6 +1,6 @@
 package library.management.system;
 import java.util.*;
-
+import java.time.LocalDate;
 public class LibraryManagementSystem
 {
     //instance variables
@@ -66,9 +66,9 @@ public class LibraryManagementSystem
     //Header for table displaying books.
     public void displayHeader()
     {
-        System.out.println("--------------------------------------------------------------------------------------------");
-        System.out.println("|N"+(char)176+"|  Title                         | Author                   | IBSN          | Issued");
-        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("-------------------------------------------------------------------------------------------------------------------");
+        System.out.println("|N"+(char)176+"|  Title                         | Author                   | IBSN          | Issued          | Return By");
+        System.out.println("-------------------------------------------------------------------------------------------------------------------");
     }
     //Main menu method for displaying menu options, with error handling. 
     public void mainMenu()
@@ -295,12 +295,14 @@ public class LibraryManagementSystem
                 }
             }
         }
-        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("-------------------------------------------------------------------------------------------------------------------");
         next(3);
     }
 //Uses the length of the values of Book object to pad with empty strings to format and print a table of books.
     public void bookDisplay(Book currentBook,int label)
     {
+        LocalDate now = LocalDate.now();
+        String overdue="";
         String issueStatus;
         String titlePad=currentBook.getTitle();
         String authorPad=currentBook.getAuthor();
@@ -326,11 +328,20 @@ public class LibraryManagementSystem
                     issueStatus="Issued";
                 }
                 else issueStatus="Available";
-                System.out.println("|"+label+"|   "+titlePad+"| "+authorPad+"| "
-                        +IBSNPad+"| "+issueStatus);
+                if(currentBook.getReturnDate()!=null)
+                {
+
+                    if(now.isAfter(currentBook.getReturnDate()))
+                    {
+                        overdue = "  ####Overdue!####";
+                    }
+                }
+                            System.out.println("|"+label+"|   "+titlePad+"| "+authorPad+"| "
+                                    +IBSNPad+"| "+issueStatus+"|          "+currentBook.getReturnDate()+overdue);
+                }
             }
         }
-    }
+
 //Prompts the user for the ISBN of the book to be removed and then searches both allBooks and isIssued and removes the matching book.
 public void removeBook()
 {
@@ -430,6 +441,10 @@ next(4);
                             } else if (!allIssued.get(IBSN)) {
                                 System.out.println("Confirm you wish to borrow " + selectedBook.getTitle() + "   |0| Cancel");
                                 if (yOrN()) {
+                                    // Overdue additional feature
+                                    LocalDate bookReturnDate = LocalDate.now().plusDays(14);
+                                    selectedBook.setReturnDate(bookReturnDate);
+                                    //
                                     allIssued.replace(IBSN, selectedBook.setisIssued(true));
                                     System.out.println("Book has been successfully issued.");
                                     next(2);
@@ -442,6 +457,7 @@ next(4);
                                     if (yOrN())
                                     {
                                         allIssued.replace(IBSN, false);
+                                        selectedBook.setReturnDate(null);
                                         System.out.println("Book has successfully been returned.");
                                         next(2);
                                     } else next(2);
@@ -538,3 +554,8 @@ public static void main(String[] args)
        newLibrary.mainMenu();
     }
 }
+
+
+
+
+

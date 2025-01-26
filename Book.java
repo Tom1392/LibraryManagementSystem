@@ -1,6 +1,6 @@
 package library.management.system;
 
-import java.util.InputMismatchException;
+import java.time.LocalDate;
 
 //CLass for book objects
 class Book
@@ -11,6 +11,7 @@ class Book
     private String author;
     private String IBSN;
     private boolean isIssued=false;
+    private LocalDate returnData;
 
     public Book(){}
 
@@ -54,7 +55,14 @@ class Book
     {
         return this.isIssued=isIssuedValue;
     }
-
+public void setReturnDate(LocalDate returnDataValue)
+{
+    this.returnData=returnDataValue;
+}
+public LocalDate getReturnDate()
+{
+    return this.returnData;
+}
 
 
 
